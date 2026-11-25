@@ -1,19 +1,24 @@
 import streamlit as st
 from PIL import Image
 import numpy as np
-import tensorflow as tf # Assuming 'model' is a TensorFlow/Keras model
+import tensorflow as tf
 import os
 
 st.title("MNIST Digit Predictor")
 st.write("Upload an image of a handwritten digit to get a prediction.")
 
-# Ensure the model is loaded (assuming 'model' is globally available or re-load it)
-# If 'model' is not loaded, you would need to load it here, e.g., model = tf.keras.models.load_model('path/to/your/model.h5')
-model_path = '68199160272_mnist_model.keras'
+model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mnist_model.keras')
 if not os.path.exists(model_path):
-    st.error(f"Model file '{model_path}' not found. Please ensure the model is saved correctly.")
-else:
-    model = tf.keras.models.load_model(model_path)
+    st.error(f"Model file '{model_path}' not found.")
+    st.stop()
+
+
+@st.cache_resource
+def load_model():
+    return tf.keras.models.load_model(model_path)
+
+
+model = load_model()
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
@@ -21,7 +26,7 @@ if uploaded_file is not None:
     try:
         # Load the image
         img = Image.open(uploaded_file)
-        st.image(img, caption='Uploaded Image', use_column_width=True)
+        st.image(img, caption='Uploaded Image', use_container_width=True)
         st.write("")
         st.write("Classifying...")
 
